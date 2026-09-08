@@ -1,0 +1,63 @@
+# Publishes the frontend to GitHub Pages on every push to main.
+#
+# This deploys the app only. Prayer times, the Hijri date, Tahajjud and Qibla all
+# work; push notifications do not, because GitHub Pages cannot run the Node
+# backend. The app says so plainly when someone taps a switch.
+#
+# Enable it once under: Settings -> Pages -> Source -> GitHub Actions.
+
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      # The prayer engine is the point of the app. Do not publish a broken one.
+      - run: npm test
+
+      - run: npm run build
+        env:
+          # No backend on Pages, so notifications are reported as unavailable.
+          VITE_API_BASE_URL: ''
+          # The city name is looked up client-side by default. Set
+          # VITE_DISABLE_GEOCODE to 'true' to drop it and contact no geocoder.
+
+      # Pages has no server-side rewrite, so the 404 page doubles as the shell.
+      - run: cp dist/index.html dist/404.html
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

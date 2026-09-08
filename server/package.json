@@ -1,0 +1,22 @@
+{
+  "name": "namaz-server",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Web Push backend for the Namaz PWA.",
+  "main": "src/index.js",
+  "engines": { "node": ">=18" },
+  "scripts": {
+    "start": "node src/index.js",
+    "migrate": "node src/database/migrate.js",
+    "vapid": "node src/scripts/generate-vapid.js",
+    "dispatch": "node src/scripts/dispatch-once.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2",
+    "mysql2": "^3.11.5",
+    "web-push": "^3.6.7"
+  }
+}

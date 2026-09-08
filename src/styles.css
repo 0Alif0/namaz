@@ -1,0 +1,364 @@
+/*
+ * Palette (spec §33): cream ground, dark green text, soft green panels.
+ * One accent only — a warm brass used for the special-day line, which is the
+ * single thing on the screen that is not there every day.
+ */
+
+:root {
+  --cream: #faf6ec;
+  --panel: #eaf1e4;
+  --panel-edge: #d5e2cd;
+  --ink: #16362a;
+  --ink-soft: #4a6357;
+  --ink-faint: #7b9084;
+  --brass: #8a6a2f;
+  --alert: #7d3327;
+
+  --serif: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, 'Times New Roman', serif;
+  --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+
+  --radius: 18px;
+  --gap: 22px;
+}
+
+* { box-sizing: border-box; }
+
+html {
+  background: var(--cream);
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 17px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+.page {
+  max-width: 26rem;
+  margin: 0 auto;
+  padding: max(28px, env(safe-area-inset-top)) 20px calc(36px + env(safe-area-inset-bottom));
+}
+
+main { display: flex; flex-direction: column; gap: var(--gap); }
+
+/* ---------- masthead ---------- */
+
+.masthead {
+  text-align: center;
+  padding-bottom: 26px;
+}
+
+.wordmark {
+  font-family: var(--serif);
+  font-size: 34px;
+  font-weight: 400;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  margin: 0 0 18px;
+  color: var(--ink);
+}
+
+.gregorian {
+  font-size: 20px;
+  margin: 0 0 4px;
+  color: var(--ink);
+}
+
+.hijri {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  background: none;
+  border: 0;
+  padding: 6px 10px;
+  margin: 0;
+  font: inherit;
+  font-size: 17px;
+  color: var(--ink-soft);
+  border-radius: 10px;
+  cursor: pointer;
+  min-height: 34px;
+}
+
+.hijri-adjust {
+  font-size: 13px;
+  color: var(--ink-faint);
+  border: 1px solid var(--panel-edge);
+  border-radius: 6px;
+  padding: 1px 5px;
+}
+
+.occasion { margin: 8px 0 0; }
+
+.occasion-name {
+  display: block;
+  font-family: var(--serif);
+  font-size: 21px;
+  color: var(--brass);
+}
+
+.occasion-note {
+  display: block;
+  font-size: 13px;
+  color: var(--ink-faint);
+  margin-top: 2px;
+}
+
+.place {
+  margin: 14px 0 0;
+  font-size: 16px;
+  color: var(--ink-soft);
+}
+
+/* ---------- panels ---------- */
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--panel-edge);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+
+.panel-heading {
+  margin: 0 0 14px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.panel-empty {
+  margin: 0;
+  color: var(--ink-soft);
+}
+
+/* ---------- prayer times ---------- */
+
+.times { list-style: none; margin: 0; padding: 0; }
+
+.time-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--panel-edge);
+}
+
+.time-row:last-child { border-bottom: 0; }
+
+.time-row--now .time-name,
+.time-row--now .time-value { font-weight: 600; }
+
+.time-name { font-size: 18px; }
+
+.time-now {
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--brass);
+  font-weight: 600;
+}
+
+.time-value {
+  font-size: 22px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+}
+
+.tahajjud-range {
+  margin: 0;
+  font-size: 26px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- qibla ---------- */
+
+.qibla-summary {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  background: none;
+  border: 0;
+  padding: 4px 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.dial { width: 132px; height: 132px; }
+.dial-ring { fill: none; stroke: var(--panel-edge); stroke-width: 2; }
+.dial-hub { fill: var(--ink-faint); }
+.dial-tick { stroke: var(--ink-faint); stroke-width: 2; }
+.needle path { fill: var(--ink); }
+.needle--aligned path { fill: var(--brass); }
+.needle { transition: transform 120ms linear; }
+
+.qibla-bearing {
+  font-size: 32px;
+  font-variant-numeric: tabular-nums;
+}
+
+.qibla-hint { font-size: 14px; color: var(--ink-soft); }
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(22, 54, 42, 0.72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 10;
+}
+
+.overlay-card {
+  background: var(--cream);
+  border-radius: var(--radius);
+  padding: 28px 24px;
+  text-align: center;
+  width: 100%;
+  max-width: 21rem;
+}
+
+.overlay-card .dial { width: 190px; height: 190px; }
+
+.overlay-bearing {
+  font-size: 20px;
+  margin: 14px 0 6px;
+  font-variant-numeric: tabular-nums;
+}
+
+.overlay-status { margin: 0 0 16px; color: var(--ink-soft); }
+.overlay-status--aligned { color: var(--brass); font-weight: 600; }
+.overlay-note { margin: 0 0 16px; font-size: 14px; color: var(--ink-faint); }
+
+/* ---------- switches ---------- */
+
+.switches { list-style: none; margin: 0 0 18px; padding: 0; }
+
+.switch-row { border-bottom: 1px solid var(--panel-edge); }
+.switch-row:last-child { border-bottom: 0; }
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 48px;
+  padding: 6px 0;
+  background: none;
+  border: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.toggle-label { flex: 1; font-size: 18px; }
+
+.toggle-state {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+  min-width: 2.4em;
+  text-align: right;
+}
+
+.toggle-track {
+  width: 50px;
+  height: 30px;
+  border-radius: 15px;
+  background: #d9ded6;
+  border: 1px solid var(--panel-edge);
+  position: relative;
+  flex: none;
+  transition: background 140ms ease;
+}
+
+.toggle[aria-checked='true'] .toggle-track { background: var(--ink); border-color: var(--ink); }
+.toggle[aria-checked='true'] .toggle-state { color: var(--ink); }
+
+.toggle-knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--cream);
+  transition: transform 140ms ease;
+}
+
+.toggle[aria-checked='true'] .toggle-knob { transform: translateX(20px); }
+.toggle:disabled { opacity: 0.55; cursor: default; }
+
+.bulk-actions { display: flex; gap: 12px; }
+
+.switch-message {
+  margin: 14px 0 0;
+  font-size: 15px;
+  color: var(--ink-soft);
+}
+
+/* ---------- buttons and notices ---------- */
+
+.button {
+  flex: 1;
+  min-height: 48px;
+  padding: 0 18px;
+  border-radius: 12px;
+  border: 1px solid var(--ink);
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.button--primary { background: var(--ink); color: var(--cream); }
+.button:disabled { opacity: 0.5; cursor: default; }
+
+.notice {
+  background: var(--panel);
+  border: 1px solid var(--panel-edge);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+
+.notice p { margin: 0 0 14px; }
+.notice p:last-child { margin-bottom: 0; }
+.notice--alert { border-color: var(--alert); }
+.notice--alert p { color: var(--alert); }
+
+.footnote {
+  margin-top: 30px;
+  text-align: center;
+}
+
+.footnote p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--ink-faint);
+}
+
+/* ---------- accessibility ---------- */
+
+:focus-visible {
+  outline: 2px solid var(--brass);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}
