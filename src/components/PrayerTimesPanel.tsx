@@ -104,9 +104,20 @@ export default function PrayerTimesPanel({
 
           <span className="time-right">
             {tahajjud ? (
-              <span className="time-value time-value--range">
-                {formatTimeRange(tahajjud.lastThirdStart, tahajjud.lastThirdEnd, timeZone)}
-              </span>
+              <>
+                <span className="time-value time-value--range">
+                  {formatTimeRange(tahajjud.lastThirdStart, tahajjud.lastThirdEnd, timeZone)}
+                </span>
+                {/*
+                  Fajr entering is what closes the window, so the row names the
+                  Fajr it closes before. `nightEnd` is that exact Fajr — today's
+                  for the night in progress, tomorrow's for the night ahead —
+                  which is also the boundary the two-thirds split is measured to.
+                */}
+                <span className="time-until">
+                  ends before Fajr {formatTime(tahajjud.nightEnd, timeZone)}
+                </span>
+              </>
             ) : (
               <span className="time-value time-value--range time-unavailable">unavailable here</span>
             )}
