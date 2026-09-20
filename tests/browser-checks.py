@@ -32,7 +32,15 @@ N.requestPermission = async () => 'granted';
 Object.defineProperty(window, 'Notification', { configurable: true, value: N });
 """
 
+def open_sheet(pg):
+    """The switches live behind the bottom button now, not on the main screen."""
+    if not pg.query_selector('.sheet'):
+        pg.click('.notify-button')
+        pg.wait_for_selector('.sheet', timeout=5000)
+        pg.wait_for_timeout(200)
+
 def state(pg):
+    open_sheet(pg)
     return {b.query_selector('.toggle-label').inner_text():
             b.query_selector('.toggle-state').inner_text()
             for b in pg.query_selector_all('.toggle')}
@@ -56,29 +64,33 @@ with sync_playwright() as p:
     denied = ctx.new_page()
     denied.add_init_script("Object.defineProperty(window,'Notification',{configurable:true,value:Object.assign(function(){},{permission:'denied'})});")
     denied.goto('http://localhost:4173/', wait_until='networkidle'); denied.wait_for_timeout(900)
+    open_sheet(denied)
     denied.get_by_role('button', name='Enable all').click(); denied.wait_for_timeout(400)
-    print('0. refused   ', state(denied), '->', denied.query_selector('.switch-message').inner_text()[:60])
+    # A blocked state is now stated up front in the sheet, not only after a tap.
+    reason = denied.query_selector('.sheet-blocker') or denied.query_selector('.switch-message')
+    print('0. refused   ', state(denied), '->', reason.inner_text()[:60] if reason else None)
+    assert reason is not None, 'a blocked state must say why'
     assert set(state(denied).values()) == {'OFF'}, 'must not claim to be on without permission'
     denied.close()
 
     print('1. initial   ', state(pg))
     assert set(state(pg).values()) == {'OFF'}, 'should start all off'
 
-    pg.get_by_role('button', name='Enable all').click(); pg.wait_for_timeout(500)
+    open_sheet(pg); pg.get_by_role('button', name='Enable all').click(); pg.wait_for_timeout(500)
     msg = pg.query_selector('.switch-message')
     print('   message:', msg.inner_text() if msg else None)
     print('2. enable all', state(pg))
     assert set(state(pg).values()) == {'ON'}
 
-    pg.get_by_role('switch', name='Dhuhr').click(); pg.wait_for_timeout(400)
+    open_sheet(pg); pg.get_by_role('switch', name='Dhuhr').click(); pg.wait_for_timeout(400)
     print('3. dhuhr off ', state(pg))
     assert state(pg)['Dhuhr'] == 'OFF' and state(pg)['Fajr'] == 'ON'
 
-    pg.get_by_role('switch', name='Dhuhr').click(); pg.wait_for_timeout(400)
+    open_sheet(pg); pg.get_by_role('switch', name='Dhuhr').click(); pg.wait_for_timeout(400)
     print('4. dhuhr on  ', state(pg))
     assert state(pg)['Dhuhr'] == 'ON'
 
-    pg.get_by_role('button', name='Mute all').click(); pg.wait_for_timeout(500)
+    open_sheet(pg); pg.get_by_role('button', name='Mute all').click(); pg.wait_for_timeout(500)
     print('5. mute all  ', state(pg))
     assert set(state(pg).values()) == {'OFF'}
 
@@ -86,10 +98,14 @@ with sync_playwright() as p:
     print('6. reloaded  ', state(pg))
     assert set(state(pg).values()) == {'OFF'}, 'mute must survive reload'
 
-    pg.get_by_role('button', name='Enable all').click(); pg.wait_for_timeout(500)
+    open_sheet(pg); pg.get_by_role('button', name='Enable all').click(); pg.wait_for_timeout(500)
     pg.reload(wait_until='networkidle'); pg.wait_for_timeout(1000)
     print('7. reloaded  ', state(pg))
     assert set(state(pg).values()) == {'ON'}, 'enable must survive reload'
+
+    if pg.query_selector('.sheet'):
+        pg.get_by_role('button', name='Done').click()
+        pg.wait_for_timeout(300)
 
     pg.screenshot(path='/tmp/shot-full.png', full_page=True)
 

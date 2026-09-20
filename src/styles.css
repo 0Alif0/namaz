@@ -1,36 +1,83 @@
 /*
- * Palette (spec §33): cream ground, dark green text, soft green panels.
- * One accent only — a warm brass used for the special-day line, which is the
- * single thing on the screen that is not there every day.
+ * Namaz — classic palette: warm paper, deep green ink, a single brass accent
+ * kept for the things that are not on the screen every day (the active prayer,
+ * a special occasion). The night theme is the same idea after dark and follows
+ * the phone; there is no theme switch to get wrong.
  */
 
 :root {
-  --cream: #faf6ec;
-  --panel: #eaf1e4;
-  --panel-edge: #d5e2cd;
-  --ink: #16362a;
-  --ink-soft: #4a6357;
-  --ink-faint: #7b9084;
-  --brass: #8a6a2f;
-  --alert: #7d3327;
+  color-scheme: light dark;
+
+  --paper: #f6f2e7;
+  --surface: #fffdf7;
+  --line: #e5ddc9;
+  --line-soft: #efe9da;
+
+  --ink: #16332a;
+  --ink-soft: #52685d;
+  --ink-faint: #8d9a91;
+
+  --gold: #8f6d28;
+  --alert: #8b3626;
+
+  --hero-bg: #16382b;
+  --hero-ink: #f6f1e3;
+  --hero-soft: #a2bdad;
+  --hero-gold: #d7b872;
+  --hero-line: rgba(246, 241, 227, 0.16);
+
+  --track: #ded7c5;
+  --switch-on: #16382b;
+  --primary-bg: #16382b;
+  --primary-ink: #f6f1e3;
+  --shadow: 0 1px 2px rgba(20, 48, 37, 0.05), 0 10px 24px -16px rgba(20, 48, 37, 0.25);
 
   --serif: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, 'Times New Roman', serif;
   --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 
-  --radius: 18px;
-  --gap: 22px;
+  --radius: 16px;
+  --radius-lg: 20px;
+  --gap: 18px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #0d1512;
+    --surface: #14201c;
+    --line: #25352e;
+    --line-soft: #1d2b25;
+
+    --ink: #e9e5d7;
+    --ink-soft: #a3b3a8;
+    --ink-faint: #74857a;
+
+    --gold: #c9a758;
+    --alert: #d9836e;
+
+    --hero-bg: #1a3a2d;
+    --hero-ink: #f2ecdd;
+    --hero-soft: #9dbdab;
+
+    /* Lifted well clear of the card so "on" and the primary action stay legible
+       against a dark surface, where the daytime green reads as nearly black. */
+    --track: #2b3b34;
+    --switch-on: #3d8062;
+    --primary-bg: #2f6550;
+    --primary-ink: #f4f0e4;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  }
 }
 
 * { box-sizing: border-box; }
 
 html {
-  background: var(--cream);
+  background: var(--paper);
   -webkit-text-size-adjust: 100%;
 }
 
 body {
   margin: 0;
-  background: var(--cream);
+  background: var(--paper);
   color: var(--ink);
   font-family: var(--sans);
   font-size: 17px;
@@ -39,9 +86,9 @@ body {
 }
 
 .page {
-  max-width: 26rem;
+  max-width: 25rem;
   margin: 0 auto;
-  padding: max(28px, env(safe-area-inset-top)) 20px calc(36px + env(safe-area-inset-bottom));
+  padding: max(24px, env(safe-area-inset-top)) 18px calc(32px + env(safe-area-inset-bottom));
 }
 
 main { display: flex; flex-direction: column; gap: var(--gap); }
@@ -50,92 +97,125 @@ main { display: flex; flex-direction: column; gap: var(--gap); }
 
 .masthead {
   text-align: center;
-  padding-bottom: 26px;
+  padding: 2px 0 20px;
 }
 
 .wordmark {
-  font-family: var(--serif);
-  font-size: 34px;
-  font-weight: 400;
-  letter-spacing: 0.16em;
+  margin: 0 0 16px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.34em;
+  text-indent: 0.34em;
   text-transform: uppercase;
-  margin: 0 0 18px;
-  color: var(--ink);
+  color: var(--ink-faint);
 }
 
 .gregorian {
-  font-size: 20px;
-  margin: 0 0 4px;
+  font-family: var(--serif);
+  font-size: 26px;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  line-height: 1.2;
+  margin: 0;
   color: var(--ink);
 }
 
+/*
+ * Full-width and centered as a flex row, not an inline auto-width element —
+ * otherwise this and .place each get centered as their own box, and two
+ * differently-sized boxes land at different x-centers (spec regression: the
+ * Hijri date and the place name visibly did not line up).
+ */
 .hijri {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 8px;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
   background: none;
   border: 0;
-  padding: 6px 10px;
-  margin: 0;
+  padding: 5px 0;
+  margin: 2px 0 0;
   font: inherit;
-  font-size: 17px;
+  font-size: 15px;
   color: var(--ink-soft);
-  border-radius: 10px;
+  border-radius: 9px;
   cursor: pointer;
-  min-height: 34px;
+  min-height: 32px;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .hijri-adjust {
-  font-size: 13px;
-  color: var(--ink-faint);
-  border: 1px solid var(--panel-edge);
-  border-radius: 6px;
-  padding: 1px 5px;
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--gold);
+  border: 1px solid currentColor;
+  border-radius: 5px;
+  padding: 0 4px;
+  line-height: 1.5;
 }
 
-.occasion { margin: 8px 0 0; }
+.occasion { margin: 10px 0 0; }
 
 .occasion-name {
   display: block;
   font-family: var(--serif);
-  font-size: 21px;
-  color: var(--brass);
+  font-size: 19px;
+  color: var(--gold);
 }
 
 .occasion-note {
   display: block;
-  font-size: 13px;
+  font-size: 12px;
   color: var(--ink-faint);
-  margin-top: 2px;
+  margin-top: 1px;
 }
 
 .place {
-  margin: 14px 0 0;
-  font-size: 16px;
-  color: var(--ink-soft);
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  margin: 10px 0 0;
+  font-size: 14px;
+  letter-spacing: 0.02em;
+  color: var(--ink-faint);
+}
+
+/* A small dot standing in for a pin, rather than an icon font. */
+.place::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--gold);
 }
 
 /* ---------- panels ---------- */
 
 .panel {
-  background: var(--panel);
-  border: 1px solid var(--panel-edge);
+  background: var(--surface);
+  border: 1px solid var(--line);
   border-radius: var(--radius);
-  padding: 20px;
+  padding: 18px;
+  box-shadow: var(--shadow);
 }
 
 .panel-heading {
-  margin: 0 0 14px;
-  font-size: 13px;
+  margin: 0 0 10px;
+  font-size: 11px;
   font-weight: 600;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--ink-soft);
+  color: var(--ink-faint);
 }
 
 .panel-empty {
   margin: 0;
   color: var(--ink-soft);
+  font-size: 15px;
 }
 
 /* ---------- prayer times ---------- */
@@ -143,76 +223,201 @@ main { display: flex; flex-direction: column; gap: var(--gap); }
 .times { list-style: none; margin: 0; padding: 0; }
 
 .time-row {
+  position: relative;
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  padding: 9px 0;
-  border-bottom: 1px solid var(--panel-edge);
+  gap: 14px;
+  padding: 11px 12px;
+  margin: 0 -12px;
+  border-bottom: 1px solid var(--line-soft);
+  border-radius: 12px;
 }
 
 .time-row:last-child { border-bottom: 0; }
 
-.time-row--now .time-name,
-.time-row--now .time-value { font-weight: 600; }
+.time-name {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 17px;
+}
 
-.time-name { font-size: 18px; }
-
-.time-now {
-  font-size: 12px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--brass);
-  font-weight: 600;
+.time-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
 }
 
 .time-value {
-  font-size: 22px;
+  font-family: var(--serif);
+  font-size: 21px;
   font-variant-numeric: tabular-nums;
-  letter-spacing: 0.01em;
+  white-space: nowrap;
 }
 
-.tahajjud-range {
-  margin: 0;
-  font-size: 26px;
-  font-variant-numeric: tabular-nums;
+.time-value--range { font-size: 16px; }
+.time-unavailable { font-family: var(--sans); font-size: 14px; color: var(--ink-faint); }
+
+.time-until {
+  font-size: 12px;
+  color: var(--ink-faint);
+  white-space: nowrap;
+}
+
+.time-qualifier {
+  font-size: 12px;
+  color: var(--ink-faint);
+}
+
+/* Sunrise is the end of Fajr, not a prayer — one step back, not hidden. */
+.time-row--minor .time-name,
+.time-row--minor .time-value {
+  color: var(--ink-faint);
+  font-size: 15px;
+}
+
+/*
+ * The prayer you are actually in. With no hero card above it this is the
+ * anchor of the screen, so it is a filled block rather than a weight change.
+ */
+.time-row--now {
+  background: var(--hero-bg);
+  border-bottom-color: transparent;
+  color: var(--hero-ink);
+}
+
+.time-row--now + .time-row { border-top: 0; }
+.time-row--now .time-name { font-weight: 600; }
+.time-row--now .time-value { font-weight: 600; color: var(--hero-ink); }
+.time-row--now .time-qualifier,
+.time-row--now .time-until { color: var(--hero-soft); }
+
+.time-row--now .time-tag {
+  color: var(--hero-bg);
+  background: var(--hero-gold);
+  border-color: var(--hero-gold);
+}
+
+/*
+ * Between sunrise and Dhuhr no window is open, and the list would otherwise
+ * carry no mark at all for those hours. The prayer being waited on is marked
+ * instead: an outlined row, never the filled block, so "waiting for this" and
+ * "you are in this" stay visibly different things. It only ever appears when
+ * there is no filled row, so the two never sit on screen together.
+ */
+.time-row--next {
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1px var(--line);
+  border-bottom-color: transparent;
+}
+
+.time-row--next + .time-row { border-top: 0; }
+.time-row--next .time-name { font-weight: 600; }
+.time-row--next .time-value { font-weight: 600; }
+
+.time-tag--next {
+  color: var(--ink-soft);
+}
+
+/*
+ * A voluntary window standing open (the last third), not a prayer falling
+ * due — a tint and an accent edge, never the solid fill .time-row--now uses,
+ * so the two states read as different things rather than a repeated "NOW".
+ */
+.time-row--active {
+  background: color-mix(in srgb, var(--gold) 12%, var(--surface));
+  border-left: 3px solid var(--gold);
+  border-bottom-color: transparent;
+  padding-left: 9px;
+}
+
+.time-tag {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold);
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  padding: 1px 7px;
+  line-height: 1.6;
+}
+
+/* How far through the open window we are, along the foot of the filled row. */
+.time-progress {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 7px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--hero-line);
+  overflow: hidden;
+}
+
+/* The outlined row is on paper, not on the dark block: the rail has to be
+   drawn against a light surface instead of a green one. */
+.time-progress--soft { background: var(--line); }
+.time-progress--soft span { background: var(--gold); }
+
+.time-progress span {
+  display: block;
+  height: 100%;
+  background: var(--hero-gold);
+  transform-origin: left center;
+  transition: transform 900ms linear;
 }
 
 /* ---------- qibla ---------- */
 
+/* Side by side: the dial earned less vertical room than it was taking. */
 .qibla-summary {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 18px;
   width: 100%;
   background: none;
   border: 0;
-  padding: 4px 0;
+  padding: 2px 0 0;
   font: inherit;
   color: inherit;
+  text-align: left;
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.dial { width: 132px; height: 132px; }
-.dial-ring { fill: none; stroke: var(--panel-edge); stroke-width: 2; }
+.qibla-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.qibla-hint--action { color: var(--gold); }
+
+.dial { width: 92px; height: 92px; flex: none; }
+.dial-ring { fill: none; stroke: var(--line); stroke-width: 2; }
 .dial-hub { fill: var(--ink-faint); }
 .dial-tick { stroke: var(--ink-faint); stroke-width: 2; }
 .needle path { fill: var(--ink); }
-.needle--aligned path { fill: var(--brass); }
+.needle--aligned path { fill: var(--gold); }
 .needle { transition: transform 120ms linear; }
 
 .qibla-bearing {
-  font-size: 32px;
+  font-family: var(--serif);
+  font-size: 30px;
+  line-height: 1.1;
   font-variant-numeric: tabular-nums;
 }
 
-.qibla-hint { font-size: 14px; color: var(--ink-soft); }
+.qibla-hint { font-size: 13px; color: var(--ink-faint); }
 
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(22, 54, 42, 0.72);
+  background: rgba(10, 24, 18, 0.78);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -221,31 +426,133 @@ main { display: flex; flex-direction: column; gap: var(--gap); }
 }
 
 .overlay-card {
-  background: var(--cream);
-  border-radius: var(--radius);
-  padding: 28px 24px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 26px 22px 22px;
   text-align: center;
   width: 100%;
-  max-width: 21rem;
+  max-width: 20rem;
 }
 
-.overlay-card .dial { width: 190px; height: 190px; }
+.overlay-card .dial { width: 180px; height: 180px; }
 
 .overlay-bearing {
-  font-size: 20px;
+  font-family: var(--serif);
+  font-size: 19px;
   margin: 14px 0 6px;
   font-variant-numeric: tabular-nums;
 }
 
-.overlay-status { margin: 0 0 16px; color: var(--ink-soft); }
-.overlay-status--aligned { color: var(--brass); font-weight: 600; }
-.overlay-note { margin: 0 0 16px; font-size: 14px; color: var(--ink-faint); }
+.overlay-status { margin: 0 0 14px; font-size: 15px; color: var(--ink-soft); }
+.overlay-status--aligned { color: var(--gold); font-weight: 600; }
+.overlay-note { margin: 0 0 14px; font-size: 13px; color: var(--ink-faint); }
+
+/* ---------- notifications: the button, and the sheet it opens ---------- */
+
+.notify-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-height: 56px;
+  padding: 0 20px;
+  border: 1px solid var(--hero-bg);
+  border-radius: var(--radius);
+  background: var(--hero-bg);
+  color: var(--hero-ink);
+  font: inherit;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.notify-button-icon {
+  display: flex;
+  flex: none;
+  color: var(--hero-gold);
+}
+
+.notify-button-icon svg { width: 20px; height: 20px; }
+
+.notify-button-label {
+  flex: 1;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.notify-button-state {
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  color: var(--hero-soft);
+}
+
+/* A sheet that rises from the bottom, where a thumb already is. */
+.overlay--bottom {
+  align-items: flex-end;
+  padding: 0;
+}
+
+.sheet {
+  background: var(--surface);
+  border-top: 1px solid var(--line);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  padding: 10px 20px calc(20px + env(safe-area-inset-bottom));
+  width: 100%;
+  max-width: 26rem;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: sheet-rise 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes sheet-rise {
+  from { transform: translateY(16px); opacity: 0.6; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.sheet-grip {
+  display: block;
+  width: 36px;
+  height: 4px;
+  margin: 0 auto 14px;
+  border-radius: 2px;
+  background: var(--line);
+}
+
+.sheet-heading {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 23px;
+  font-weight: 400;
+}
+
+.sheet-intro {
+  margin: 3px 0 14px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink-faint);
+}
+
+/* Shown before anything is tapped, so a blocked state is never a surprise. */
+.sheet-blocker {
+  margin: 0 0 14px;
+  padding: 12px 14px;
+  border: 1px solid var(--gold);
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink);
+  background: color-mix(in srgb, var(--gold) 10%, transparent);
+}
+
+.sheet-close { width: 100%; margin-top: 14px; }
 
 /* ---------- switches ---------- */
 
-.switches { list-style: none; margin: 0 0 18px; padding: 0; }
+.switches { list-style: none; margin: 0 0 16px; padding: 0; }
 
-.switch-row { border-bottom: 1px solid var(--panel-edge); }
+.switch-row { border-bottom: 1px solid var(--line-soft); }
 .switch-row:last-child { border-bottom: 0; }
 
 .toggle {
@@ -253,40 +560,53 @@ main { display: flex; flex-direction: column; gap: var(--gap); }
   align-items: center;
   gap: 12px;
   width: 100%;
-  min-height: 48px;
-  padding: 6px 0;
+  min-height: 46px;
+  padding: 4px 0;
   background: none;
   border: 0;
   font: inherit;
   color: inherit;
   cursor: pointer;
   text-align: left;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.toggle-label { flex: 1; font-size: 18px; }
+.toggle-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.toggle-label { font-size: 17px; }
+
+.toggle-meta {
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-faint);
+}
 
 .toggle-state {
-  font-size: 13px;
+  font-size: 10px;
   font-weight: 600;
-  letter-spacing: 0.08em;
-  color: var(--ink-soft);
-  min-width: 2.4em;
+  letter-spacing: 0.14em;
+  color: var(--ink-faint);
+  min-width: 2.6em;
   text-align: right;
 }
 
 .toggle-track {
-  width: 50px;
-  height: 30px;
-  border-radius: 15px;
-  background: #d9ded6;
-  border: 1px solid var(--panel-edge);
+  width: 46px;
+  height: 28px;
+  border-radius: 14px;
+  background: var(--track);
   position: relative;
   flex: none;
-  transition: background 140ms ease;
+  transition: background 160ms ease;
 }
 
-.toggle[aria-checked='true'] .toggle-track { background: var(--ink); border-color: var(--ink); }
-.toggle[aria-checked='true'] .toggle-state { color: var(--ink); }
+.toggle[aria-checked='true'] .toggle-track { background: var(--switch-on); }
+.toggle[aria-checked='true'] .toggle-state { color: var(--ink-soft); }
 
 .toggle-knob {
   position: absolute;
@@ -295,67 +615,88 @@ main { display: flex; flex-direction: column; gap: var(--gap); }
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: var(--cream);
-  transition: transform 140ms ease;
+  background: #fffdf7;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  transition: transform 160ms ease;
 }
 
-.toggle[aria-checked='true'] .toggle-knob { transform: translateX(20px); }
-.toggle:disabled { opacity: 0.55; cursor: default; }
+.toggle[aria-checked='true'] .toggle-knob { transform: translateX(18px); }
+.toggle:disabled { opacity: 0.5; cursor: default; }
 
-.bulk-actions { display: flex; gap: 12px; }
+.bulk-actions { display: flex; gap: 10px; }
 
 .switch-message {
   margin: 14px 0 0;
-  font-size: 15px;
+  padding-left: 22px;
+  position: relative;
+  font-size: 14px;
+  line-height: 1.55;
   color: var(--ink-soft);
 }
+
+/* A tick or a cross, so success and failure differ by more than wording. */
+.switch-message::before {
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-weight: 700;
+}
+
+.switch-message--good::before { content: '\2713'; color: var(--gold); }
+.switch-message--bad::before { content: '\2715'; color: var(--alert); }
+.switch-message--bad { color: var(--alert); }
 
 /* ---------- buttons and notices ---------- */
 
 .button {
   flex: 1;
-  min-height: 48px;
-  padding: 0 18px;
-  border-radius: 12px;
-  border: 1px solid var(--ink);
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 11px;
+  border: 1px solid var(--line);
   background: transparent;
   color: var(--ink);
   font: inherit;
+  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.button--primary { background: var(--ink); color: var(--cream); }
+.button--primary {
+  background: var(--primary-bg);
+  border-color: var(--primary-bg);
+  color: var(--primary-ink);
+}
+
+/* Secondary in weight but still a real target, not a hyperlink. */
+.button--quiet {
+  width: 100%;
+  margin-top: 10px;
+  border-style: dashed;
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+
 .button:disabled { opacity: 0.5; cursor: default; }
 
 .notice {
-  background: var(--panel);
-  border: 1px solid var(--panel-edge);
+  background: var(--surface);
+  border: 1px solid var(--line);
   border-radius: var(--radius);
-  padding: 20px;
+  padding: 18px;
+  box-shadow: var(--shadow);
 }
 
-.notice p { margin: 0 0 14px; }
+.notice p { margin: 0 0 14px; font-size: 15px; line-height: 1.55; }
 .notice p:last-child { margin-bottom: 0; }
 .notice--alert { border-color: var(--alert); }
 .notice--alert p { color: var(--alert); }
 
-.footnote {
-  margin-top: 30px;
-  text-align: center;
-}
-
-.footnote p {
-  margin: 0;
-  font-size: 13px;
-  line-height: 1.6;
-  color: var(--ink-faint);
-}
-
 /* ---------- accessibility ---------- */
 
 :focus-visible {
-  outline: 2px solid var(--brass);
+  outline: 2px solid var(--gold);
   outline-offset: 3px;
 }
 

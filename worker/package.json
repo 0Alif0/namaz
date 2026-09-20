@@ -1,0 +1,21 @@
+{
+  "name": "namaz-worker",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Web Push backend for the Namaz PWA, on Cloudflare Workers + D1.",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "schema": "wrangler d1 execute namaz --remote --file=./schema.sql",
+    "schema:local": "wrangler d1 execute namaz --local --file=./schema.sql",
+    "vapid": "node ./scripts/generate-vapid.js",
+    "tail": "wrangler tail"
+  },
+  "dependencies": {
+    "@block65/webcrypto-web-push": "^2.0.0"
+  },
+  "devDependencies": {
+    "wrangler": "^4.135.0"
+  }
+}

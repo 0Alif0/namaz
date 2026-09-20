@@ -101,11 +101,16 @@ export function buildSchedule(input: BuildScheduleInput): ScheduleEntry[] {
     .sort((a, b) => Date.parse(a.fireAt) - Date.parse(b.fireAt));
 }
 
+/**
+ * Tahajjud is the voluntary night prayer; the last third is the interval it is
+ * most emphasised in. The switch names the interval, because that is what is
+ * being timed.
+ */
 export const PRAYER_LABELS: Record<NotifiablePrayer, string> = {
   fajr: 'Fajr',
   dhuhr: 'Dhuhr',
   asr: 'Asr',
   maghrib: 'Maghrib',
   isha: 'Isha',
-  tahajjud: 'Tahajjud',
+  tahajjud: 'Last third of the night',
 };

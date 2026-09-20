@@ -16,13 +16,17 @@ import { toMysqlUtc } from '../services/validate.js';
  */
 export const STALE_AFTER_MINUTES = 20;
 
+/**
+ * Tahajjud is the prayer; the last third is the interval. The notification names
+ * the interval, because that is what has just begun.
+ */
 const TITLES = {
   fajr: 'Fajr',
   dhuhr: 'Dhuhr',
   asr: 'Asr',
   maghrib: 'Maghrib',
   isha: 'Isha',
-  tahajjud: 'Tahajjud',
+  tahajjud: 'Last third of the night',
 };
 
 const BODIES = {
@@ -31,7 +35,7 @@ const BODIES = {
   asr: 'It is time for Asr.',
   maghrib: 'It is time for Maghrib.',
   isha: 'It is time for Isha.',
-  tahajjud: 'The last third of the night has begun.',
+  tahajjud: 'It has begun, and runs until Fajr.',
 };
 
 let configured = false;

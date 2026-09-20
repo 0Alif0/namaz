@@ -4,3 +4,17 @@ dist/
 .env.local
 *.log
 .DS_Store
+
+# TypeScript incremental build state
+tsconfig.tsbuildinfo
+
+# Vite leaves this behind if the dev server is killed abruptly
+vite.config.ts.timestamp-*.mjs
+
+# Wrangler local state and bundle output. `.wrangler/` holds the local D1 file
+# and cached credentials; neither belongs in the repository.
+.wrangler/
+worker/.dryrun/
+
+# Local Worker secrets (VAPID private key). Real ones live in `wrangler secret`.
+.dev.vars

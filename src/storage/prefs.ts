@@ -105,6 +105,10 @@ export function anyEnabled(prefs: NotificationPrefs): boolean {
   return NOTIFIABLE_PRAYERS.some((prayer) => prefs[prayer]);
 }
 
+export function countEnabled(prefs: NotificationPrefs): number {
+  return NOTIFIABLE_PRAYERS.filter((prayer) => prefs[prayer]).length;
+}
+
 export function loadLocation(): StoredLocation | null {
   const stored = readJson<StoredLocation>(KEYS.location);
   if (!stored || typeof stored.latitude !== 'number' || typeof stored.longitude !== 'number') {

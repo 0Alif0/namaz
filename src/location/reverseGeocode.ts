@@ -25,7 +25,8 @@ const VIA_BACKEND = import.meta.env?.VITE_GEOCODE_VIA_BACKEND === 'true';
 const DISABLED = import.meta.env?.VITE_DISABLE_GEOCODE === 'true';
 const DIRECT_ENDPOINT = 'https://api.bigdatacloud.net/data/reverse-geocode-client';
 
-const CACHE_KEY = 'namaz.placeNames.v1';
+// v2: names are built differently now, so old cached strings must not be reused.
+const CACHE_KEY = 'namaz.placeNames.v2';
 const CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 
 export function coarseKey(latitude: number, longitude: number): string {
@@ -67,15 +68,43 @@ function remember(latitude: number, longitude: number, name: string): void {
   writeCache(cache);
 }
 
-/** Builds "Brooklyn, New York" from a BigDataCloud response. */
-export function pickName(data: Record<string, unknown>): string | null {
-  const locality = (data.locality || data.city) as string | undefined;
-  const region = data.principalSubdivision as string | undefined;
-  const country = data.countryName as string | undefined;
+/**
+ * The geocoder returns formal country names — "United Kingdom of Great Britain
+ * and Northern Ireland". Intl knows the short one people actually use.
+ */
+function countryLabel(code: string | undefined, formal: string | undefined): string | undefined {
+  if (code) {
+    try {
+      const short = new Intl.DisplayNames(undefined, { type: 'region' }).of(code);
+      if (short && short !== code) return short;
+    } catch {
+      // Older engine, or an unrecognised code. Fall back to what was sent.
+    }
+  }
+  return formal;
+}
 
-  if (locality && region && locality !== region) return `${locality}, ${region}`;
-  if (locality) return locality;
-  if (region && country) return `${region}, ${country}`;
+/** Builds "Brooklyn, New York" or "London, United Kingdom". */
+export function pickName(data: Record<string, unknown>): string | null {
+  const city = data.city as string | undefined;
+  const locality = data.locality as string | undefined;
+  const region = data.principalSubdivision as string | undefined;
+  const code = data.countryCode as string | undefined;
+  const country = countryLabel(code, data.countryName as string | undefined);
+
+  /*
+   * In the US the neighbourhood is the half that means something — "Brooklyn",
+   * where `city` says "New York City" — and the state is how people place it.
+   * Elsewhere it inverts: `city` gives "London" where `locality` gives "City of
+   * Westminster", and the country places it better than a subdivision does.
+   */
+  const isUS = code === 'US';
+  const place = isUS ? locality ?? city : city ?? locality;
+  const qualifier = isUS ? region ?? country : country ?? region;
+
+  if (place && qualifier && place !== qualifier) return `${place}, ${qualifier}`;
+  if (place) return place;
+  if (region && country && region !== country) return `${region}, ${country}`;
   return country ?? null;
 }
 

@@ -17,12 +17,45 @@ export interface LastThirdInput {
   nextFajr: Date;
 }
 
+/**
+ * The window closes a minute before Fajr rather than at it. Fajr ending the
+ * night is what defines the third; it is not a moment you are still free to be
+ * praying Tahajjud in.
+ */
+export const CLOSES_BEFORE_FAJR_MS = 60_000;
+
 export interface LastThirdResult {
   nightStart: Date;
+  /** Fajr: the boundary the two-thirds split is measured to. */
   nightEnd: Date;
   lastThirdStart: Date;
+  /** The last minute you can be praying: Fajr minus one minute. */
+  lastThirdEnd: Date;
   /** Night length in milliseconds. */
   nightDurationMs: number;
+}
+
+/**
+ * Which night's last third applies right now.
+ *
+ * Before Fajr the night in progress began at *yesterday's* Maghrib, so that is
+ * the window the user is actually inside — showing the coming night instead puts
+ * an end time roughly a day away behind a clock reading that looks almost
+ * identical. From Fajr onwards the relevant night is the one about to begin,
+ * today's Maghrib through tomorrow's Fajr.
+ *
+ * Returns null rather than substituting the other night when the one that
+ * applies cannot be calculated, since a plausible wrong night is worse than
+ * saying nothing.
+ */
+export function activeLastThird(input: {
+  now: Date;
+  todayFajr: Date;
+  inProgress: LastThirdResult | null;
+  upcoming: LastThirdResult | null;
+}): LastThirdResult | null {
+  const { now, todayFajr, inProgress, upcoming } = input;
+  return now.getTime() < todayFajr.getTime() ? inProgress : upcoming;
 }
 
 export function calculateLastThird({ maghrib, nextFajr }: LastThirdInput): LastThirdResult {
@@ -37,11 +70,15 @@ export function calculateLastThird({ maghrib, nextFajr }: LastThirdInput): LastT
   }
 
   const duration = end - start;
+  const lastThirdStart = start + (duration * 2) / 3;
 
   return {
     nightStart: new Date(start),
     nightEnd: new Date(end),
-    lastThirdStart: new Date(start + (duration * 2) / 3),
+    lastThirdStart: new Date(lastThirdStart),
+    // Clamped so a pathologically short night can never produce a window that
+    // closes before it opens.
+    lastThirdEnd: new Date(Math.max(lastThirdStart, end - CLOSES_BEFORE_FAJR_MS)),
     nightDurationMs: duration,
   };
 }

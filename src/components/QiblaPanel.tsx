@@ -91,9 +91,11 @@ export default function QiblaPanel({ bearing }: Props) {
 
       <button type="button" className="qibla-summary" onClick={openCompass}>
         <Dial rotation={bearing} aligned={false} />
-        <span className="qibla-bearing">{formatBearing(bearing)}</span>
-        <span className="qibla-hint">{compassPointName(bearing)} of true north</span>
-        <span className="qibla-hint">Tap for compass</span>
+        <span className="qibla-text">
+          <span className="qibla-bearing">{formatBearing(bearing)}</span>
+          <span className="qibla-hint">{compassPointName(bearing)} of true north</span>
+          <span className="qibla-hint qibla-hint--action">Tap for compass</span>
+        </span>
       </button>
 
       {open && (

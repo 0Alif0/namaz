@@ -116,6 +116,41 @@ export async function syncSchedule(payload: SyncPayload): Promise<void> {
   }
 }
 
+/**
+ * Re-uploads the schedule for a new location, but only if this device is already
+ * subscribed. Never prompts for permission and never changes the switches: it
+ * runs after the user has moved, not in response to a tap. Returns whether
+ * anything was sent.
+ */
+export async function resyncSchedule(payload: Omit<SyncPayload, 'subscription'>): Promise<boolean> {
+  if (!API_BASE) return false;
+  if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) return false;
+  if (typeof window === 'undefined' || !('PushManager' in window)) return false;
+
+  const subscription = await getPushSubscription();
+  if (!subscription) return false;
+
+  await syncSchedule({ ...payload, subscription: subscription.toJSON() });
+  return true;
+}
+
+/**
+ * Asks the backend to push one notification to this device now, so a new install
+ * can be verified without waiting for the next prayer.
+ */
+export async function sendTestPush(): Promise<void> {
+  const subscription = await getPushSubscription();
+  if (!subscription) throw new Error('This device is not subscribed');
+
+  const response = await fetch(apiUrl('/api/test-push'), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ endpoint: subscription.endpoint }),
+  });
+
+  if (!response.ok) throw new Error('The test notification could not be sent');
+}
+
 export async function unsubscribePush(): Promise<void> {
   const subscription = await getPushSubscription();
   if (!subscription) return;

@@ -23,7 +23,20 @@ export interface Coordinates {
   longitude: number;
 }
 
-export function getCurrentPosition(timeoutMs = 15_000): Promise<Coordinates> {
+export interface PositionRequest {
+  timeoutMs?: number;
+  /**
+   * How stale a cached fix may be, in milliseconds. Pass 0 when the point of the
+   * call is to detect that the user has moved — otherwise the browser is free to
+   * hand back the position it already had, and travel goes unnoticed.
+   */
+  maximumAgeMs?: number;
+}
+
+export function getCurrentPosition({
+  timeoutMs = 15_000,
+  maximumAgeMs = 60_000,
+}: PositionRequest = {}): Promise<Coordinates> {
   return new Promise((resolve, reject) => {
     if (typeof navigator === 'undefined' || !navigator.geolocation) {
       reject(new LocationError('unsupported', 'This device cannot provide a location.'));
@@ -45,7 +58,7 @@ export function getCurrentPosition(timeoutMs = 15_000): Promise<Coordinates> {
           reject(new LocationError('unavailable', 'Your location could not be determined.'));
         }
       },
-      { enableHighAccuracy: false, timeout: timeoutMs, maximumAge: 10 * 60 * 1000 },
+      { enableHighAccuracy: false, timeout: timeoutMs, maximumAge: maximumAgeMs },
     );
   });
 }

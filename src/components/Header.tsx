@@ -22,9 +22,9 @@ export default function Header({
 
   return (
     <header className="masthead">
-      <h1 className="wordmark">Namaz</h1>
+      <p className="wordmark">Namaz</p>
 
-      <p className="gregorian">{formatGregorianDate(now, timeZone)}</p>
+      <h1 className="gregorian">{formatGregorianDate(now, timeZone)}</h1>
 
       <button
         type="button"
@@ -34,7 +34,7 @@ export default function Header({
       >
         {hijri.formatted}
         {hijriOffset !== 0 && (
-          <span className="hijri-adjust">{hijriOffset > 0 ? '+1 day' : '\u22121 day'}</span>
+          <span className="hijri-adjust">{hijriOffset > 0 ? '+1' : '−1'}</span>
         )}
       </button>
 

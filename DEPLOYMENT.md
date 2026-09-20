@@ -1,4 +1,21 @@
-# Deploying Namaz on Hostinger
+# Deploying Namaz
+
+There are two supported ways to run this, and they differ mainly in cost:
+
+| | Cost | Notifications | Guide |
+|---|---|---|---|
+| **Cloudflare** | Free, no card | Yes | **[worker/README.md](worker/README.md)** |
+| Hostinger | Business plan or above | Yes | This document |
+| GitHub Pages | Free | No — static only | [Below](#publishing-on-github-pages) |
+
+**If you are starting from scratch, use Cloudflare.** Pages, Workers, D1 and the
+every-minute Cron Trigger are all permanently free, and it is the only free
+option that can actually deliver push notifications. The rest of this document
+covers the Hostinger path, which the `server/` directory targets.
+
+---
+
+## Deploying on Hostinger
 
 Nothing here needs a Mac, Xcode, or a paid domain. Everything is done from hPanel
 and a terminal on any operating system.
@@ -41,7 +58,7 @@ On your own machine:
 cp .env.example .env
 # set VITE_API_BASE_URL to your API subdomain, e.g. https://api.yourdomain.com
 npm install
-npm test          # 101 tests; do not deploy if these fail
+npm test          # 128 tests; do not deploy if these fail
 npm run build
 ```
 

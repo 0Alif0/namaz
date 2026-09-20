@@ -1,0 +1,21 @@
+name = "namaz-api"
+main = "src/index.js"
+compatibility_date = "2025-01-01"
+
+# Every minute. This is what actually delivers the notifications — without it
+# subscriptions are stored and nothing is ever sent. Cron Triggers are free.
+[triggers]
+crons = ["* * * * *"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "namaz"
+database_id = "919522b2-4970-4fd3-ac63-ea7fc9fe45fe"
+
+[vars]
+# Comma-separated, scheme included, no trailing slash. Must match exactly where
+# the app is served from, or the browser will refuse the response.
+ALLOWED_ORIGINS = "https://namaztime.pages.dev"
+
+# VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, VAPID_SUBJECT and CRON_SECRET are secrets,
+# set with `wrangler secret put NAME`. They are never committed.

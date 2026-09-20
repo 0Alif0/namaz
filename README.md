@@ -1,4 +1,4 @@
-# Namaz
+# Salah
 
 A single-screen prayer times app for iPhone. Today's times, the Hijri date, the
 last third of the night, the Qibla, and prayer notifications. No settings page,
@@ -6,12 +6,15 @@ no tabs, no audio.
 
 ```
 npm install
-npm test        # 101 tests
+npm test        # 128 tests
 npm run dev
 ```
 
-Deployment is in [DEPLOYMENT.md](DEPLOYMENT.md), which covers Hostinger (full app,
-including notifications) and GitHub Pages (everything except notifications).
+To put it online free, including notifications, follow
+[worker/README.md](worker/README.md) — Cloudflare Pages for the app, Workers +
+D1 + an every-minute cron for the push backend, all on permanently free tiers.
+[DEPLOYMENT.md](DEPLOYMENT.md) covers the alternatives: Hostinger (paid) and
+GitHub Pages (free, but no notifications).
 
 ## How it is put together
 
@@ -29,10 +32,16 @@ iPhone (Home Screen PWA)
         |
         |  POST /api/schedule   { subscription, timezone, prefs, schedule[] }
         v                        <- UTC instants only, never coordinates
-Express + MySQL (Hostinger Node.js app)
-  web-push -> APNs -> iPhone
-  cron every minute -> /api/internal/dispatch
+Push backend — either one, same contract:
+  worker/  Cloudflare Workers + D1, Cron Trigger every minute   (free)
+  server/  Express + MySQL, cron every minute                   (Hostinger)
+        |
+        v
+  Web Push -> APNs -> iPhone
 ```
+
+Both backends share `server/src/services/validate.js`, so the input rules are
+tested once and hold for either.
 
 ## Prayer calculation
 
@@ -66,12 +75,35 @@ that gap can be addressed properly rather than fudged.
 
 ## Definitions worth knowing
 
-**Tahajjud** is the last third of the night measured **Maghrib → next day's Fajr**,
-which is what the specification's written rule says. It gives 1:54 AM for New York
-on 8 September 2026. The worked example in the same specification says 2:46 AM,
-which comes from measuring the night **sunset → sunrise** instead. Both are in real
-use. Both are pinned in `tests/tahajjud.test.ts`. To switch, pass `sunrise`
-instead of `nextFajr` in `App.tsx` and `notifications/schedule.ts`.
+**The last third of the night** is measured **Maghrib → next day's Fajr**, which
+is what the specification's written rule says:
+
+```
+last third start = Maghrib + (Fajr − Maghrib) × 2/3
+last third end   = Fajr − 1 minute
+```
+
+The window closes a minute before Fajr rather than at it: Fajr ending the night
+is what defines the third, not a moment you are still free to be praying in.
+
+The worked example in the same specification says 2:46 AM, which comes from
+measuring the night **sunset → sunrise** instead. Both are in real use. Both are
+pinned in `tests/tahajjud.test.ts`. To switch, pass `sunrise` instead of
+`nextFajr` in `App.tsx` and `notifications/schedule.ts`.
+
+**Which night is shown** depends on the time of day, and this matters. Before
+Fajr the night in progress began at *yesterday's* Maghrib, so that is the window
+displayed — at 2 AM in New York on 8 September 2026 it reads 1:54 AM – 5:12 AM.
+Pairing today's Maghrib with tomorrow's Fajr instead would read 1:54 AM – 5:14 AM:
+almost identical on the clock, but a different night ending twenty-seven hours
+away. `activeLastThird()` picks between them, and if the applicable night cannot
+be calculated the panel says so rather than substituting the other one.
+
+**Tahajjud** itself is the voluntary night prayer, not the interval. The interval
+is the last third; Tahajjud may be prayed through the night, and the last third
+is its most emphasised portion. It therefore sits in the list directly after
+Isha, labelled `Tahajjud · last third`, and the notification and its switch name
+the interval rather than the prayer.
 
 **The Hijri date** uses the Umm al-Qura calendar. It is calculated, not observed,
 and ICU's other Islamic calendars disagree with it: for 8 September 2026 in New
@@ -82,6 +114,15 @@ remembers the choice, for people whose local announcement differs.
 **Special days** roll over at Maghrib, not midnight, so "night of" observances
 appear on the correct evening. Moon-dependent occasions are labelled as expected
 rather than certain.
+
+**Location follows you.** Position is re-checked whenever the app comes to the
+foreground, and on a slow timer while it is left open. Those passes refuse a
+cached fix — the browser will otherwise hand back a position up to its
+`maximumAge` old and travel goes unnoticed. A background pass is silent: no
+spinner, and a failure leaves the last known location in place rather than
+replacing the screen with an error. Move more than 20 km and the queued
+notifications are rebuilt for the new position, so landing in London does not
+leave you on Brooklyn's Fajr.
 
 ## Privacy
 
@@ -97,12 +138,12 @@ identifier. No analytics, no advertising, no third-party scripts.
 
 ```
 src/
-  components/     Header, PrayerTimesPanel, TahajjudPanel, QiblaPanel,
+  components/     Header, PrayerTimesPanel, QiblaPanel,
                   NotificationsPanel, Toggle, Notice
-  prayer/         engine.ts, sanity.ts, tahajjud.ts
+  prayer/         engine.ts, sanity.ts, tahajjud.ts, next.ts
   qibla/          bearing.ts, compass.ts
   calendar/       hijri.ts, specialDays.ts
-  location/       geolocation.ts, reverseGeocode.ts
+  location/       geolocation.ts, reverseGeocode.ts, distance.ts
   notifications/  push.ts, schedule.ts
   storage/        prefs.ts
   utils/          time.ts, format.ts
@@ -110,9 +151,12 @@ server/src/
   routes/         schedule.js, vapid.js, placeName.js, dispatch.js
   notifications/  webpush.js
   database/       pool.js, migrate.js, migrations.sql
-  services/       validate.js
-tests/            prayer, qibla, tahajjud, calendar, notifications,
-                  serverValidation
+  services/       validate.js   <- shared with worker/
+worker/
+  src/index.js    routes + the cron's scheduled() handler
+  schema.sql      the same tables, in SQLite
+tests/            prayer, qibla, tahajjud, calendar, next, placeName,
+                  notifications, serverValidation
 ```
 
 No calculation code imports React. No component imports `adhan`.
@@ -128,8 +172,11 @@ including the 10:17 PM failure case, ordering across 365 days in eight cities,
 both 2026 DST transitions, a zone without DST, past and future dates, polar day
 and polar night, Qibla for five cities cross-checked against adhan's own
 implementation, Tahajjud under both definitions, Hijri progression over 1200 days,
-special-day matching, the full notification sequence with persistence, schedule
-building, and server-side input validation.
+special-day matching, which prayer window is open (including the gap between
+sunrise and Dhuhr, where none is), which night's last third applies and that it
+closes before Fajr, the rollover to tomorrow's Fajr after Isha, place-name
+formatting from real geocoder responses, the full notification sequence with
+persistence, schedule building, and server-side input validation.
 
 `npm test` does not cover: real Web Push delivery, iOS Home Screen installation,
 or the physical compass. Those need a real iPhone. See the status report.
