@@ -18,18 +18,19 @@ export interface LastThirdInput {
 }
 
 /**
- * The window closes a minute before Fajr rather than at it. Fajr ending the
+ * The window closes two minutes before Fajr rather than at it. Fajr ending the
  * night is what defines the third; it is not a moment you are still free to be
- * praying Tahajjud in.
+ * praying Tahajjud in. Two minutes rather than one so the gap survives rounding
+ * to whole displayed minutes and still reads as a gap on the clock.
  */
-export const CLOSES_BEFORE_FAJR_MS = 60_000;
+export const CLOSES_BEFORE_FAJR_MS = 120_000;
 
 export interface LastThirdResult {
   nightStart: Date;
   /** Fajr: the boundary the two-thirds split is measured to. */
   nightEnd: Date;
   lastThirdStart: Date;
-  /** The last minute you can be praying: Fajr minus one minute. */
+  /** The last minute you can be praying: Fajr minus two minutes. */
   lastThirdEnd: Date;
   /** Night length in milliseconds. */
   nightDurationMs: number;

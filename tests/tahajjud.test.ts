@@ -178,20 +178,20 @@ describe('the window closes before Fajr, not at it', () => {
   const sep7 = calculatePrayerTimesForCivilDate({ ...NY, civil: { year: 2026, month: 9, day: 7 } });
   const sep8 = calculatePrayerTimesForCivilDate({ ...NY, civil: { year: 2026, month: 9, day: 8 } });
 
-  it('ends one minute before Fajr', () => {
+  it('ends two minutes before Fajr', () => {
     const result = calculateLastThird({ maghrib: sep7.maghrib, nextFajr: sep8.fajr });
 
-    expect(sep8.fajr.getTime() - result.lastThirdEnd.getTime()).toBe(60_000);
+    expect(sep8.fajr.getTime() - result.lastThirdEnd.getTime()).toBe(120_000);
     expect(result.lastThirdEnd.getTime()).toBeLessThan(sep8.fajr.getTime());
     // The split itself is still measured to Fajr.
     expect(result.nightEnd.getTime()).toBe(sep8.fajr.getTime());
   });
 
-  it('reads 1:54 AM to 5:11 AM for New York on 8 September 2026', () => {
+  it('reads 1:54 AM to 5:10 AM for New York on 8 September 2026', () => {
     const result = calculateLastThird({ maghrib: sep7.maghrib, nextFajr: sep8.fajr });
 
     expect(formatTime(sep8.fajr, TZ)).toBe('5:12 AM');
-    expect(formatTimeRange(result.lastThirdStart, result.lastThirdEnd, TZ)).toBe('1:54 AM – 5:11 AM');
+    expect(formatTimeRange(result.lastThirdStart, result.lastThirdEnd, TZ)).toBe('1:54 AM – 5:10 AM');
   });
 
   it('never closes before it opens, even on an absurdly short night', () => {
