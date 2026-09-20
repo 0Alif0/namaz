@@ -111,11 +111,11 @@ npm run build
 Then publish `dist/`:
 
 ```bash
-npx wrangler pages deploy dist --project-name=namaz
+npx wrangler pages deploy dist --project-name=namaztime
 ```
 
 The first run asks to create the project; accept. It prints your app URL, like
-`https://namaz.pages.dev`.
+`https://namaztime.pages.dev`.
 
 ## 6. Let the app talk to the backend
 
@@ -124,7 +124,7 @@ The Worker only answers origins it has been told about. Put your Pages URL in
 
 ```toml
 [vars]
-ALLOWED_ORIGINS = "https://namaz.pages.dev"
+ALLOWED_ORIGINS = "https://namaztime.pages.dev"
 ```
 
 Then redeploy the Worker:
@@ -184,7 +184,7 @@ prayer, then queue one a couple of minutes out by hand.
 
 ```bash
 # the app
-npm run build && npx wrangler pages deploy dist --project-name=namaz
+npm run build && npx wrangler pages deploy dist --project-name=namaztime
 
 # the backend
 cd worker && npx wrangler deploy

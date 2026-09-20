@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "typecheck": "tsc -b --noEmit"
+    "typecheck": "tsc -b --noEmit",
+    "deploy": "npm run build && wrangler pages deploy dist --project-name=namaztime"
   },
   "dependencies": {
     "adhan": "4.4.4",

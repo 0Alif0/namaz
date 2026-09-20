@@ -228,8 +228,20 @@ does not pretend to have scheduled anything.
    VAPID key and database password live only in hPanel, so a public repository
    leaks nothing. Check `git status` before your first push regardless.
 2. Repository → Settings → Pages → Source → **GitHub Actions**.
-3. Push to `main`. The included `.github/workflows/deploy-pages.yml` runs the
-   test suite, builds, and publishes. If the tests fail, nothing is published.
+3. Add a workflow that runs `npm test`, then `npm run build`, then publishes
+   `dist/` with `actions/deploy-pages`. Pages has no server-side rewrite, so
+   copy `dist/index.html` to `dist/404.html` in the same job to let the 404 page
+   double as the shell.
+
+   **`.github/workflows/static.yml` does not do this yet.** It uploads
+   `path: '.'` with no build step, so Pages would serve the repository as-is —
+   and the root `index.html` loads `/src/main.tsx`, TypeScript that no browser
+   can execute, giving a blank page. It needs `npm ci && npm run build` and
+   `path: 'dist'` before it publishes anything that works.
+
+   Note that Cloudflare, the live host, does not deploy from git at all: the
+   app goes out with `npm run deploy`. Pushing to `main` updates GitHub Pages
+   only.
 
 Your site appears at `https://<user>.github.io/<repo>/`.
 
