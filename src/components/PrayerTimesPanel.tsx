@@ -31,6 +31,14 @@ export default function PrayerTimesPanel({
 }: Props) {
   const highlight = highlightedPrayer(times, nextName, now);
 
+  /*
+   * Which Fajr closes the window. For the night still ahead that is tomorrow's,
+   * a minute or two off the Fajr listed above — so the row names it rather than
+   * printing a bare time that looks like it contradicts that row.
+   */
+  const closesAtTomorrowFajr =
+    tahajjud !== null && tahajjud.nightEnd.getTime() !== times.fajr.getTime();
+
   const inLastThird =
     tahajjud !== null &&
     now.getTime() >= tahajjud.lastThirdStart.getTime() &&
@@ -115,7 +123,8 @@ export default function PrayerTimesPanel({
                   which is also the boundary the two-thirds split is measured to.
                 */}
                 <span className="time-until">
-                  ends before Fajr {formatTime(tahajjud.nightEnd, timeZone)}
+                  {closesAtTomorrowFajr ? "ends before tomorrow's Fajr" : 'ends before Fajr'}{' '}
+                  {formatTime(tahajjud.nightEnd, timeZone)}
                 </span>
               </>
             ) : (

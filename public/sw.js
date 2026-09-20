@@ -8,7 +8,7 @@
  * step, so what you read here is exactly what runs on the phone.
  */
 
-const CACHE_VERSION = 'v7';
+const CACHE_VERSION = 'v8';
 const CACHE_NAME = `namaz-${CACHE_VERSION}`;
 
 /*
